@@ -21,7 +21,7 @@
 
             <label for="inputPassword">Password:</label><br>
             <input id="inputPassword" type="password" placeholder="Password@123">
-            <p id="inputPasswordError" class="error-msg hidden">please enter your password.</p>
+            <p id="inputPasswordError" class="error-msg hidden"></p>
 
             <button id="btnLogin"> Login </button>
 
@@ -33,6 +33,9 @@
         const btnLogin = document.querySelector('#btnLogin');
         const inputEmail = document.querySelector('#inputEmail');
         const inputPassword = document.querySelector('#inputPassword');
+
+        const inputEmailError = document.querySelector('#inputEmailError');
+        const inputPasswordError = document.querySelector('#inputPasswordError');
 
 
         btnLogin.onclick = function () {
@@ -53,23 +56,38 @@
             // if email is empty then show alert message "Please enter your email address!"
             if (inputEmail.value == "") {
                 console.log('Please enter your email address');
+                inputEmailError.innerText = 'Please enter your email address!';
+                inputEmailError.classList.remove('hidden');
                 flag = false;
             }
             else if (!isMailVaild()) {
                 console.log('Please enter correct email address format');
+                inputEmailError.innerText = 'Please enter correct email address format!';
+                inputEmailError.classList.remove('hidden');
                 flag = false;
+            }
+            else{
+                inputEmailError.classList.add('hidden');
             }
 
             if (inputPassword.value == "") {
                 console.log('Please enter your password');
+                inputPasswordError.innerText = 'Please enter your password!';
+                inputPasswordError.classList.remove('hidden');
                 flag = false;
             }
             else if (inputPassword.value.length < 6) {
                 console.log('Please enter correct password format (length must be 6 characters at least)');
+                inputPasswordError.innerText = 'Please enter correct password format (length must be 6 characters at least)';
+                inputPasswordError.classList.remove('hidden');
                 flag = false;
+            }else{
+                inputPasswordError.classList.add('hidden');
             }
 
 
+            
+           
             if (flag) {
                 console.log("open home page...");
             }
