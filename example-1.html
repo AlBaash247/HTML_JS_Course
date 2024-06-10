@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+
+    <h1 id="h1Greeting">Hi</h1>
+
+    <script>
+
+        var h1Greeting = document.querySelector("#h1Greeting");
+        h1Greeting.innerText = "Hello, World!";
+
+        var l = "on";
+
+
+        function lightSwitch() {
+            l == "on" ? console.log("On") : console.log("Off");
+        }
+
+        lightSwitch();
+
+    </script>
+</body>
+
+</html>
