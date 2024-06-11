@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        img {
+            height: 500px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 id="h1Info"></h1>
+    <img id="imgPhoto">
+
+    <script>
+        const h1Info = document.querySelector('#h1Info');
+        const imgPhoto = document.querySelector('#imgPhoto');
+        // h1Info.innerText = "Hello, world!";\\
+
+        callImageAPI();
+
+        async function callImageAPI() {
+            const IMAGE_INFO_API_URL = "https://picsum.photos/id/0/info";
+            var response = await fetch(IMAGE_INFO_API_URL);
+        
+            if (!response.ok) {
+                throw new Error(`HTTP error! status : ${response.status}`);
+            }
+
+            var responseJSON = await response.json();
+
+            h1Info.innerText =responseJSON.author;
+            imgPhoto.src =responseJSON.download_url;
+
+        }
+
+
+
+
+
+
+
+
+    </script>
+</body>
+
+</html>
