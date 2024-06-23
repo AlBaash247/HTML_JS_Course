@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <style>
+      .card {
+        width: 400px;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        transition: 0.3s;
+        border-radius: 5px;
+        margin: 10px;
+      }
+
+      .card:hover {
+        box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+      }
+
+      .container {
+        padding: 2px 16px;
+      }
+
+      .title {
+        color: grey;
+        font-size: 18px;
+      }
+
+      .img-bg {
+        width: 100%;
+        height: 300px;
+        background-image: url("https://picsum.photos/id/0/5000/3333");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+
+      #cardsContainer {
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: space-around;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="cardsContainer"></div>
+
+    <template id="cardTemplate">
+      <div id="card" class="card">
+        <div id="cardImg" class="img-bg"></div>
+        <div class="container">
+          <h4>
+            <span id="cardId">#</span>
+            <span id="cardAuthor" class="title">CEO & Founder, Example</span>
+          </h4>
+          <p>
+            <a
+              id="cardURL"
+              href="https://unsplash.com/photos/yC-Yzbqy7PY"
+              target="_blank"
+              >more details</a
+            >
+          </p>
+        </div>
+      </div>
+    </template>
+
+    <script>
+      const cardsContainer = document.querySelector("#cardsContainer");
+      const cardTemplate = document.querySelector("#cardTemplate");
+
+      callImageAPI();
+
+      async function callImageAPI() {
+        const IMAGE_INFO_API_URL = "https://picsum.photos/v2/list";
+        var response = await fetch(IMAGE_INFO_API_URL);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status : ${response.status}`);
+        }
+
+        var jsonResonse = await response.json();
+        dataAdapter(jsonResonse);
+      }
+
+      function dataAdapter(jsonResonse) {
+        jsonResonse.forEach((item) => {
+          const clone = cardTemplate.content.cloneNode(true);
+
+          const card = clone.querySelector("#card");
+          const cardImg = clone.querySelector("#cardImg");
+          const cardId = clone.querySelector("#cardId");
+          const cardAuthor = clone.querySelector("#cardAuthor");
+          const cardURL = clone.querySelector("#cardURL");
+
+          // we can store the current object information into a dataset, so we can use it later
+          // store the current object in card dataset as json object, under the name of (itemData)
+          card.dataset.itemData = JSON.stringify(item);
+
+          cardImg.style.backgroundImage = `url(${item.download_url})`;
+          cardId.innerText = "#" + item.id;
+          cardAuthor.innerText = item.author;
+          cardURL.href = item.url;
+
+          card.onclick = function () {
+            // on card click get dataset as JSON. Then, convert it to javascript object
+            var storedObject = JSON.parse(card.dataset.itemData);
+            
+            //display the stored object data
+            alert(`
+                "id": ${storedObject.id},
+                "author": ${storedObject.author},
+                "width": ${storedObject.width},
+                "height": ${storedObject.height},
+                "url": ${storedObject.url},
+                "download_url": ${storedObject.download_url}
+                `);
+          };
+
+          cardsContainer.appendChild(clone);
+        });
+      }
+    </script>
+  </body>
+</html>
