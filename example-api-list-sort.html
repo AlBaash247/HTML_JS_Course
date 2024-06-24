@@ -51,7 +51,7 @@
         style="width: 50%; font-size: 24px"
       />
       <button id="btnSearch">SEARCH</button>
-      <button id="btnSearch">SORT</button>
+      <button id="btnSort">SORT</button>
     </div>
 
     <div id="cardsContainer"></div>
@@ -80,7 +80,15 @@
       const cardsContainer = document.querySelector("#cardsContainer");
       const cardTemplate = document.querySelector("#cardTemplate");
       const btnSearch = document.querySelector("#btnSearch");
+      const btnSort = document.querySelector("#btnSort");
+
+      var sortedJsonReponse = [];
+
       btnSearch.onclick = function () {
+        alert("wait for api response");
+      };
+
+      btnSort.onclick = function () {
         alert("wait for api response");
       };
 
@@ -95,9 +103,16 @@
         }
 
         const jsonReponse = await response.json();
+        sortedJsonReponse = jsonReponse;
 
         btnSearch.onclick = function () {
           search(jsonReponse);
+        };
+
+        btnSort.onclick = function () {
+          sort(sortedJsonReponse);
+          cardsContainer.innerHTML = "";
+          adapter(sortedJsonReponse);
         };
 
         adapter(jsonReponse);
@@ -132,10 +147,21 @@
         }
       }
 
-      var sortedJsonReponse = [];
+      
 
-      function sort(jsonReponse) {
-        
+      function sort(sortedJsonReponse) {
+        for (var i = 0; i < sortedJsonReponse.length - 1; i++) {
+          if (sortedJsonReponse[i].author < sortedJsonReponse[i + 1].author) {
+            swapAlgo(i);
+          }
+        }
+      }
+
+      function swapAlgo(i) {
+        var x = sortedJsonReponse[i];
+        sortedJsonReponse[i] = sortedJsonReponse[i + 1];
+        sortedJsonReponse[i + 1] = x;
+        sort(sortedJsonReponse);
       }
 
       function createCard(imgInfoObj) {
