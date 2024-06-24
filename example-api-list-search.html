@@ -106,27 +106,7 @@
       function adapter(jsonReponse) {
         for (var i = 0; i < jsonReponse.length; i++) {
           var imgInfoObj = jsonReponse[i];
-
-          // const card = document.querySelector('#card')
-          const clone = cardTemplate.content.cloneNode(true);
-
-          const card = clone.querySelector("#card");
-          const cardImg = clone.querySelector("#cardImg");
-          const cardAuthor = clone.querySelector("#cardAuthor");
-
-          cardImg.style.backgroundImage = `url(${imgInfoObj.download_url})`;
-          cardAuthor.innerText = imgInfoObj.author;
-
-          //dataset - store author
-          card.dataset.itemData = JSON.stringify(imgInfoObj);
-
-          card.onclick = function () {
-            // retrieve author
-            var storeObject = JSON.parse(card.dataset.itemData);
-            alert(storeObject.author);
-          };
-
-          cardsContainer.appendChild(clone);
+          createCard(imgInfoObj);
         }
       }
 
@@ -146,26 +126,7 @@
                 .toLowerCase()
                 .includes(inputSearch.value.toLowerCase())
             ) {
-              // const card = document.querySelector('#card')
-              const clone = cardTemplate.content.cloneNode(true);
-
-              const card = clone.querySelector("#card");
-              const cardImg = clone.querySelector("#cardImg");
-              const cardAuthor = clone.querySelector("#cardAuthor");
-
-              cardImg.style.backgroundImage = `url(${imgInfoObj.download_url})`;
-              cardAuthor.innerText = imgInfoObj.author;
-
-              //dataset - store author
-              card.dataset.itemData = JSON.stringify(imgInfoObj);
-
-              card.onclick = function () {
-                // retrieve author
-                var storeObject = JSON.parse(card.dataset.itemData);
-                alert(storeObject.author);
-              };
-
-              cardsContainer.appendChild(clone);
+              createCard(imgInfoObj);
             }
           }
         }
@@ -176,48 +137,32 @@
 
         for (var i = 0; i < jsonReponse.length; i++) {
           var imgInfoObj = jsonReponse[i];
-
-          // const card = document.querySelector('#card')
-          const clone = cardTemplate.content.cloneNode(true);
-
-          const card = clone.querySelector("#card");
-          const cardImg = clone.querySelector("#cardImg");
-          const cardAuthor = clone.querySelector("#cardAuthor");
-
-          cardImg.style.backgroundImage = `url(${imgInfoObj.download_url})`;
-          cardAuthor.innerText = imgInfoObj.author;
-
-          //dataset - store author
-          card.dataset.itemData = JSON.stringify(imgInfoObj);
-
-          card.onclick = function () {
-            // retrieve author
-            var storeObject = JSON.parse(card.dataset.itemData);
-            alert(storeObject.author);
-          };
-
-          cardsContainer.appendChild(clone);
         }
       }
 
       var array = [1, 3, 4, 9, 6, 5, 2, 7, 10, 8];
 
-      algo();
-      function algo() {
-        for (var i = 0; i <= array.length - 1; i++) {
-          if (array[i] < array[i + 1]) {
-            swapAlgo(i);
-          } 
-            console.log(array[i]);
-        
-        }
-      }
+      function createCard(imgInfoObj) {
+        // const card = document.querySelector('#card')
+        const clone = cardTemplate.content.cloneNode(true);
 
-      function swapAlgo(i) {
-        var x = array[i];
-        array[i] = array[i + 1];
-        array[i + 1] = x;
-        algo();
+        const card = clone.querySelector("#card");
+        const cardImg = clone.querySelector("#cardImg");
+        const cardAuthor = clone.querySelector("#cardAuthor");
+
+        cardImg.style.backgroundImage = `url(${imgInfoObj.download_url})`;
+        cardAuthor.innerText = imgInfoObj.author;
+
+        //dataset - store author
+        card.dataset.itemData = JSON.stringify(imgInfoObj);
+
+        card.onclick = function () {
+          // retrieve author
+          var storeObject = JSON.parse(card.dataset.itemData);
+          alert(storeObject.author);
+        };
+
+        cardsContainer.appendChild(clone);
       }
     </script>
   </body>
