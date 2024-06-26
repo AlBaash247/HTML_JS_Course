@@ -1,0 +1,59 @@
+<script>
+  var numbers = [2, 67, 4, 23, 90, 21, 2, 5, 70, 187, 21, 6];
+var arrayNames = [
+  "Hafidh",
+  "Hadeel",
+  "Dania",
+  "Mahfoodh",
+  "Jana",
+  "Yara",
+  "Ghainaa",
+  "Joory"
+];
+
+
+
+function bubbleSorting(arr) {
+  var n = arr.length;
+
+  for (var i = 0; i < n; i++) {
+    for (var j = 0; j < n - i - 1; j++) {
+      if (arr[j] > arr[j + 1]) {
+        swap(arr, j, j + 1);
+      }
+    }
+  }
+
+  return arr;
+}
+
+function selectionSorting(arr) {
+  for (var i = 0; i < arr.length - 1; i++) {
+    var min = i;
+    for (var j = i + 1; j < arr.length; j++) {
+      if (arr[min] > arr[j]) {
+        min = j;
+      }
+    }
+
+    swap(arr, i, min);
+    // var temp = arr[i];
+    // arr[i] = arr[min];
+    // arr[min] = temp;
+  }
+
+  return arr;
+}
+
+function swap(arr, left, right) {
+  var temp = arr[left];
+  arr[left] = arr[right];
+  arr[right] = temp;
+}
+
+// console.log(bubbleSorting(numbers));
+// console.log(bubbleSorting(arrayNames));
+console.log(selectionSorting(numbers));
+console.log(selectionSorting(arrayNames));
+
+</script>

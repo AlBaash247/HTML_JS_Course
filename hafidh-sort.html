@@ -1,0 +1,36 @@
+<script>
+  var numbers = [2, 67, 4, 23, 90, 21, 2, 5, 70, 187, 21, 6];
+  var arrayNames = [
+    "Hafidh",
+    "Hadeel",
+    "Dania",
+    "Mahfoodh",
+    "Jana",
+    "Yara",
+    "Ghainaa",
+    "Joory",
+  ];
+
+  function selectionSorting(arr) {
+    for (var i = 0; i < arr.length; i++) {
+      var min = i;
+      for (var j = i + 1; j < arr.length; j++) {
+        if (arr[min] > arr[j]) {
+          min = j;
+        }
+      }
+      sawp(arr,i, min);
+    }
+    console.log(arr);
+  }
+
+  function sawp(arr, i, min) {
+        var temp = arr[i];
+        arr[i] = arr[min];
+        arr[min] = temp;
+
+  }
+
+  selectionSorting(numbers);
+  selectionSorting(arrayNames);
+</script>

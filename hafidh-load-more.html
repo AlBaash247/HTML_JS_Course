@@ -1,0 +1,244 @@
+<style>
+  .container {
+  width: 100vw;
+  max-width: 1280px;
+  min-height: 600px;
+  min-width: 1000px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 0 auto 50px;
+  gap: 20px;
+}
+
+.border {
+  height: 369px;
+  width: 290px;
+  background: transparent;
+  border-radius: 10px;
+  transition: border 1s;
+  position: relative;
+}
+
+.border:hover {
+  border: 1px solid #fff;
+}
+
+.card {
+  height: 379px;
+  width: 300px;
+  background: #808080;
+  border-radius: 10px;
+  transition: background 0.8s;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 70px 63px -60px #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  background-size: 300px;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+.card:hover {
+  background-size: 600px;
+  background-position: left center;
+  background-repeat: no-repeat;
+}
+
+.card:hover h2 {
+  opacity: 1;
+}
+
+h2 {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #fff;
+  margin: 20px;
+  opacity: 0;
+  transition: opacity 1s;
+}
+
+.btn {
+  width: 120px;
+  height: 40px;
+  position: absolute;
+  font-family: sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-radius: 10px;
+  background-color: white;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+}
+
+.searchArea {
+  display: flex;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 20px;
+  gap: 5px;
+}
+
+input#searchBox {
+  width: 100%;
+  font-size: 24px;
+}
+
+div#btnContainer {
+  display: flex;
+  width: 1280px;
+  margin: 0 auto;
+  justify-content: space-between;
+}
+div#btnContainer.load-more-container {
+  justify-content: center;
+}
+
+</style>
+<div class="searchArea">
+  <input id="searchBox" type="text" name="SearchBox" placeholder="Enter author name...">
+  <input id="searchBtn" type="button" value="SEARCH">
+  <input id="sortBtn" type="button" value="SORT">
+</div>
+<div class="container" id="container"></div>
+<div class="btn-container load-more-container" id="btnContainer">
+  <button class="load-more" id="load">Load More</button>
+</div>
+
+<template id="cardTemplate">
+  <div class="card" id="card">
+    <div class="border">
+      <h2 class="author" id="author"></h2>
+      <button class="btn" id="btn">More Info</button>
+    </div>
+  </div>
+</template>
+
+<script>
+ const container = document.querySelector("#container");
+const cardTemplate = document.querySelector("#cardTemplate");
+const searchBox = document.querySelector("#searchBox");
+const searchBtn = document.querySelector("#searchBtn");
+const sortBtn = document.querySelector("#sortBtn");
+const prevBtn = document.querySelector("#prev");
+const nextBtn = document.querySelector("#next");
+const load = document.querySelector("#load");
+
+const API_URL = "https://picsum.photos/v2/list";
+
+async function apiCallback(url) {
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`HTTP error status: ${response.status}`);
+  }
+
+  const jasonResponse = await response.json();
+
+  displayOutput(jasonResponse);
+
+  sortBtn.onclick = function () {
+    container.innerHTML = "";
+    sorting(jasonResponse);
+    displayOutputByAuthor(jasonResponse);
+  };
+  searchBtn.onclick = function () {
+    displayOutputByAuthor(jasonResponse);
+  };
+}
+
+apiCallback(API_URL);
+
+var i = 1;
+
+load.onclick = function () {
+  var url = `${API_URL}?page=${i + 1}`;
+  apiCallback(url);
+  i++;
+};
+
+function displayOutput(data) {
+  for (var i = 0; i < data.length; i++) {
+    var imgInfo = data[i];
+    cloning(imgInfo);
+  }
+}
+
+function displayOutputByAuthor(data) {
+  container.innerHTML = "";
+
+  if (searchBox.value == "") {
+    displayOutput(data);
+  } else {
+    searchArr(data);
+  }
+}
+
+function cloning(imgInfo) {
+  const clone = cardTemplate.content.cloneNode(true);
+
+  const card = clone.querySelector("#card");
+  const author = clone.querySelector("#author");
+  const btn = clone.querySelector("#btn");
+
+  author.innerText = imgInfo.author;
+  card.style.backgroundImage = `url(${imgInfo.download_url})`;
+
+  //store card info into dataset of the card as JSON object
+  card.dataset.info = JSON.stringify(imgInfo);
+
+  btn.addEventListener("click", function () {
+    this.style.boxShadow = `inset 2px 2px 2px 1px rgb(129 119 119 / 50%),
+    inset -2px -2px 2px 1px rgb(233 217 217 / 50%)`;
+
+    // get clicked card dataset as JSON. Then, convert it to javascript object
+    var storedObject = JSON.parse(card.dataset.info);
+
+    alert(`
+      "id": ${storedObject.id},
+      "author": ${storedObject.author},
+      "width": ${storedObject.width},
+      "height": ${storedObject.height},
+      "url": ${storedObject.url},
+      "download_url": ${storedObject.download_url}
+      `);
+  });
+
+  container.appendChild(clone);
+}
+
+function searchArr(arr) {
+  for (var i = 0; i < arr.length; i++) {
+    if (arr[i].author.toLowerCase().includes(searchBox.value.toLowerCase())) {
+      cloning(arr[i]);
+    }
+  }
+  return "";
+}
+
+function sorting(arr) {
+  var n = arr.length;
+
+  for (var i = 0; i < n; i++) {
+    for (var j = 0; j < n - i - 1; j++) {
+      if (arr[j].author > arr[j + 1].author) {
+        swap(arr, j, j + 1);
+      }
+      cloning(arr[i]);
+    }
+  }
+
+  return arr;
+}
+
+function swap(arr, left, right) {
+  var temp = arr[left];
+  arr[left] = arr[right];
+  arr[right] = temp;
+}
+
+</script>

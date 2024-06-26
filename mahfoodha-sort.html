@@ -1,0 +1,128 @@
+<style>
+    body{
+        background-color: rgb(235, 237, 232);
+      
+    }
+
+    
+.card {
+    background-color: #fff;
+    width: 21.25em;
+    box-shadow: 0 5px 25px rgba(1 1 1 / 15%);
+    border-radius: 10px;
+    padding: 25px;
+    margin: 15px;
+    transition: 0.7s ease;
+}
+
+    .card:hover {
+    transform: scale(1.05);
+}
+.card img {
+    width: 100%;
+    height: auto;
+}
+
+
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .buttons {
+      text-align: center;
+      margin-top: 20px;
+      align-items:center;
+    }
+</style>
+
+<input type="text" id="search" placeholder="Search by author">
+<button onclick="searchImages()">Search</button>
+<button onclick="sortImages()">Sort</button>
+</div>
+
+<div class="container" id="imageContainer"></div>
+
+<div class="buttons">
+<button onclick="previousPage()">Previous</button>
+<button onclick="nextPage()">Next</button>
+<button onclick="loadMore()">Load More</button>
+</div>
+
+
+<script>
+const API_URL = "https://picsum.photos/v2/list";
+    let images = [];
+    let currentPage = 1;
+    let itemsPerPage = 10;
+    let totalPages = 0;
+
+    async function fetchImages() {
+      const response = await fetch(`${API_URL}?page=${currentPage}`);
+      const data = await response.json();
+      images = data;
+      totalPages = Math.ceil(data.length / itemsPerPage);
+      displayImages(images);
+    }
+
+    function displayImages(images) {
+      const container = document.getElementById('imageContainer');
+      container.innerHTML = '';
+      images.forEach(image => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <img src="${image.download_url}" alt="${image.author}" width="100%">
+          <p>${image.author}</p>
+          <button onclick="alertDetails(${image.id}, '${image.author}', ${image.width}, ${image.height}, '${image.url}', '${image.download_url}')">Read More</button>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function alertDetails(id, author, width, height, url, download_url) {
+      alert(`
+        "id": ${id},
+        "author": ${author},
+        "width": ${width},
+        "height": ${height},
+        "url": ${url},
+        "download_url": ${download_url}
+      `);
+    }
+
+    function searchImages() {
+      const query = document.getElementById('search').value.toLowerCase();
+      const filteredImages = images.filter(image => image.author.toLowerCase().includes(query));
+      displayImages(filteredImages);
+    }
+
+    function sortImages() {
+      images.sort((a, b) => a.author.localeCompare(b.author));
+      console.log(images);
+      displayImages(images);
+    }
+
+    function loadMore() {
+      itemsPerPage += 10;
+      fetchImages();
+    }
+
+    function nextPage() {
+      if (currentPage < totalPages) {
+        currentPage++;
+        fetchImages();
+      }
+    }
+
+    function previousPage() {
+      if (currentPage > 1) {
+        currentPage--;
+        fetchImages();
+      }
+    }
+
+    fetchImages();
+  
+</script>
