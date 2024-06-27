@@ -146,7 +146,7 @@
     var new_jasonResponse = await response.json();
         
     jasonResponse = jasonResponse.concat(new_jasonResponse);
-    
+
 
 
     displayOutput(jasonResponse);
@@ -163,7 +163,7 @@
 
   apiCallback(API_URL);
 
-  var i = 0;
+  var i = 1;
 
   load.onclick = function () {
     i++;
@@ -173,6 +173,8 @@
   };
 
   function displayOutput(data) {
+    container.innerHTML = "";
+
     for (var i = 0; i < data.length; i++) {
       var imgInfo = data[i];
       cloning(imgInfo);
