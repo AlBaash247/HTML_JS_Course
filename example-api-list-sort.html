@@ -22,6 +22,11 @@
         padding: 2px 16px;
       }
 
+      .container-title {
+        margin: top 72px;
+        color: #07b3c3;
+      }
+
       .title {
         color: grey;
         font-size: 18px;
@@ -35,7 +40,7 @@
         background-repeat: no-repeat;
       }
 
-      #cardsContainer {
+      .cards-container {
         display: flex;
         flex-flow: row wrap;
         justify-content: space-around;
@@ -52,9 +57,12 @@
       />
       <button id="btnSearch">SEARCH</button>
       <button id="btnSort">SORT</button>
+      <button id="btnGroup">Group</button>
     </div>
 
-    <div id="cardsContainer"></div>
+    <div id="cardsContainer" class="cards-container"></div>
+
+    <div id="groupsContainer"></div>
 
     <template id="cardTemplate">
       <div id="card" class="card">
@@ -78,9 +86,11 @@
 
     <script>
       const cardsContainer = document.querySelector("#cardsContainer");
+      const groupsContainer = document.querySelector("#groupsContainer");
       const cardTemplate = document.querySelector("#cardTemplate");
       const btnSearch = document.querySelector("#btnSearch");
       const btnSort = document.querySelector("#btnSort");
+      const btnGroup = document.querySelector("#btnGroup");
 
       var sortedJsonReponse = [];
 
@@ -92,10 +102,14 @@
         alert("wait for api response");
       };
 
+      btnGroup.onclick = function () {
+        alert("wait for api response");
+      };
+
       getImagesFromAPI();
 
       async function getImagesFromAPI() {
-        const API_URL = "https://picsum.photos/v2/list";
+        const API_URL = "https://picsum.photos/v2/list?limit=60";
         const response = await fetch(API_URL);
 
         if (!response.ok) {
@@ -113,6 +127,10 @@
           sort(sortedJsonReponse);
           cardsContainer.innerHTML = "";
           adapter(sortedJsonReponse);
+        };
+
+        btnGroup.onclick = function () {
+          group(jsonReponse);
         };
 
         adapter(jsonReponse);
@@ -146,8 +164,6 @@
           }
         }
       }
-
-      
 
       function sort(sortedJsonReponse) {
         for (var i = 0; i < sortedJsonReponse.length - 1; i++) {
@@ -185,6 +201,70 @@
         };
 
         cardsContainer.appendChild(clone);
+      }
+
+      function group(jsonReponse) {
+        cardsContainer.innerHTML = "";
+        groupsContainer.innerHTML = "";
+
+        const uniqueAuthorsArray = getUniqueAuthorsArray(jsonReponse);
+
+        createAuthorContainers(uniqueAuthorsArray);
+
+        for (var i = 0; i < jsonReponse.length; i++) {
+          var imgInfoObj = jsonReponse[i];
+          createCardInGroup(imgInfoObj);
+        }
+      }
+
+      function getUniqueAuthorsArray(jsonReponse) {
+        const allAuthors = jsonReponse.map((item) => item.author);
+        return [...new Set(allAuthors)];
+      }
+
+      function createAuthorContainers(uniqueAuthorsArray) {
+        uniqueAuthorsArray.forEach((item) => {
+          const containerHR = document.createElement("hr");
+          const containerTitle = document.createElement("h1");
+          containerTitle.classList.add("container-title");
+          containerTitle.innerText = item;
+
+          const containerElement = document.createElement("div");
+          containerElement.id = `cardsContainer_${item}`;
+          containerElement.classList.add("cards-container");
+
+          containerTitle.onclick = function () {
+            console.log(containerElement.id);
+          };
+
+          groupsContainer.appendChild(containerHR);
+          groupsContainer.appendChild(containerTitle);
+          groupsContainer.appendChild(containerElement);
+        });
+      }
+
+      function createCardInGroup(imgInfoObj) {
+        // const card = document.querySelector('#card')
+        const clone = cardTemplate.content.cloneNode(true);
+
+        const card = clone.querySelector("#card");
+        const cardImg = clone.querySelector("#cardImg");
+        const cardAuthor = clone.querySelector("#cardAuthor");
+
+        cardImg.style.backgroundImage = `url(${imgInfoObj.download_url})`;
+        cardAuthor.innerText = imgInfoObj.author;
+
+        //dataset - store author
+        card.dataset.itemData = JSON.stringify(imgInfoObj);
+
+        card.onclick = function () {
+          // retrieve author
+          var storeObject = JSON.parse(card.dataset.itemData);
+          alert(storeObject.author);
+        };
+
+        var containerId = "cardsContainer_" + imgInfoObj.author;
+        document.getElementById(containerId).appendChild(clone);
       }
     </script>
   </body>
