@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <style>
+      .card {
+        width: 400px;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        transition: 0.3s;
+        border-radius: 5px;
+        margin: 10px;
+      }
+
+      .card:hover {
+        box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+      }
+
+      .container {
+        padding: 2px 16px;
+      }
+
+      .container-title {
+        margin: top 72px;
+        color: #07b3c3;
+      }
+
+      .title {
+        color: grey;
+        font-size: 18px;
+      }
+
+      .img-bg {
+        width: 100%;
+        height: 300px;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+
+      .cards-container {
+        display: none;
+        flex-flow: row wrap;
+        justify-content: space-around;
+      }
+
+      .active{
+        display: flex;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div style="text-align: center">
+      <input
+        id="inputSearch"
+        type="search"
+        style="width: 50%; font-size: 24px"
+      />
+      <button id="btnSearch">SEARCH</button>
+      <button id="btnSort">SORT</button>
+      <button id="btnGroup">Group</button>
+    </div>
+
+    <div id="cardsContainer" class="cards-container active"></div>
+
+    <div id="groupsContainer"></div>
+
+    <template id="cardTemplate">
+      <div id="card" class="card">
+        <div id="cardImg" class="img-bg"></div>
+        <div class="container">
+          <h4>
+            <span id="cardId">#</span>
+            <span id="cardAuthor" class="title">CEO & Founder, Example</span>
+          </h4>
+          <p>
+            <a
+              id="cardURL"
+              href="https://unsplash.com/photos/yC-Yzbqy7PY"
+              target="_blank"
+              >more details</a
+            >
+          </p>
+        </div>
+      </div>
+    </template>
+
+    <script>
+      const cardsContainer = document.querySelector("#cardsContainer");
+      const groupsContainer = document.querySelector("#groupsContainer");
+      const cardTemplate = document.querySelector("#cardTemplate");
+      const btnSearch = document.querySelector("#btnSearch");
+      const btnSort = document.querySelector("#btnSort");
+      const btnGroup = document.querySelector("#btnGroup");
+
+      var sortedJsonReponse = [];
+
+      btnSearch.onclick = function () {
+        alert("wait for api response");
+      };
+
+      btnSort.onclick = function () {
+        alert("wait for api response");
+      };
+
+      btnGroup.onclick = function () {
+        alert("wait for api response");
+      };
+
+      getImagesFromAPI();
+
+      async function getImagesFromAPI() {
+        const API_URL = "https://picsum.photos/v2/list?limit=60";
+        const response = await fetch(API_URL);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status : ${response.status}`);
+        }
+
+        const jsonReponse = await response.json();
+        sortedJsonReponse = jsonReponse;
+
+        btnSearch.onclick = function () {
+          search(jsonReponse);
+        };
+
+        btnSort.onclick = function () {
+          sort(sortedJsonReponse);
+          cardsContainer.innerHTML = "";
+          adapter(sortedJsonReponse);
+        };
+
+        btnGroup.onclick = function () {
+          group(jsonReponse);
+        };
+
+        adapter(jsonReponse);
+      }
+
+      function adapter(jsonReponse) {
+        for (var i = 0; i < jsonReponse.length; i++) {
+          var imgInfoObj = jsonReponse[i];
+          createCard(imgInfoObj);
+        }
+      }
+
+      function search(jsonReponse) {
+        const inputSearch = document.querySelector("#inputSearch");
+        cardsContainer.innerHTML = "";
+
+        if (inputSearch.value == "") {
+          adapter(jsonReponse);
+        } else {
+          for (var i = 0; i < jsonReponse.length; i++) {
+            var imgInfoObj = jsonReponse[i];
+
+            // Check if seach input is empty, then display all items
+            if (
+              imgInfoObj.author
+                .toLowerCase()
+                .includes(inputSearch.value.toLowerCase())
+            ) {
+              createCard(imgInfoObj);
+            }
+          }
+        }
+      }
+
+      function sort(sortedJsonReponse) {
+        for (var i = 0; i < sortedJsonReponse.length - 1; i++) {
+          if (sortedJsonReponse[i].author < sortedJsonReponse[i + 1].author) {
+            swapAlgo(i);
+          }
+        }
+      }
+
+      function swapAlgo(i) {
+        var x = sortedJsonReponse[i];
+        sortedJsonReponse[i] = sortedJsonReponse[i + 1];
+        sortedJsonReponse[i + 1] = x;
+        sort(sortedJsonReponse);
+      }
+
+      function createCard(imgInfoObj) {
+        // const card = document.querySelector('#card')
+        const clone = cardTemplate.content.cloneNode(true);
+
+        const card = clone.querySelector("#card");
+        const cardImg = clone.querySelector("#cardImg");
+        const cardAuthor = clone.querySelector("#cardAuthor");
+
+        cardImg.style.backgroundImage = `url(${imgInfoObj.download_url})`;
+        cardAuthor.innerText = imgInfoObj.author;
+
+        //dataset - store author
+        card.dataset.itemData = JSON.stringify(imgInfoObj);
+
+        card.onclick = function () {
+          // retrieve author
+          var storeObject = JSON.parse(card.dataset.itemData);
+          alert(storeObject.author);
+        };
+
+        cardsContainer.appendChild(clone);
+      }
+
+      function group(jsonReponse) {
+        cardsContainer.innerHTML = "";
+        groupsContainer.innerHTML = "";
+
+        const uniqueAuthorsArray = getUniqueAuthorsArray(jsonReponse);
+
+        createAuthorContainers(uniqueAuthorsArray);
+
+        for (var i = 0; i < jsonReponse.length; i++) {
+          var imgInfoObj = jsonReponse[i];
+          createCardInGroup(imgInfoObj);
+        }
+      }
+
+      function getUniqueAuthorsArray(jsonReponse) {
+        const allAuthors = jsonReponse.map((item) => item.author);
+        return [...new Set(allAuthors)];
+      }
+
+      function createAuthorContainers(uniqueAuthorsArray) {
+        uniqueAuthorsArray.forEach((item, index) => {
+          const containerHR = document.createElement("hr");
+          const containerTitle = document.createElement("h1");
+          containerTitle.classList.add("container-title");
+          containerTitle.innerText = item;
+
+          const containerElement = document.createElement("div");
+          containerElement.id = `cardsContainer_${item}`;
+          containerElement.classList.add("cards-container");
+          if (index==0) {
+            containerElement.classList.add("active");
+          }
+
+          containerTitle.onclick = function () {
+            console.log(containerElement.id);
+          };
+
+          groupsContainer.appendChild(containerHR);
+          groupsContainer.appendChild(containerTitle);
+          groupsContainer.appendChild(containerElement);
+        });
+      }
+
+      function createCardInGroup(imgInfoObj) {
+        // const card = document.querySelector('#card')
+        const clone = cardTemplate.content.cloneNode(true);
+
+        const card = clone.querySelector("#card");
+        const cardImg = clone.querySelector("#cardImg");
+        const cardAuthor = clone.querySelector("#cardAuthor");
+
+        cardImg.style.backgroundImage = `url(${imgInfoObj.download_url})`;
+        cardAuthor.innerText = imgInfoObj.author;
+
+        //dataset - store author
+        card.dataset.itemData = JSON.stringify(imgInfoObj);
+
+        card.onclick = function () {
+          // retrieve author
+          var storeObject = JSON.parse(card.dataset.itemData);
+          alert(storeObject.author);
+        };
+
+        var containerId = "cardsContainer_" + imgInfoObj.author;
+        document.getElementById(containerId).appendChild(clone);
+      }
+    </script>
+  </body>
+</html>
