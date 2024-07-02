@@ -1,0 +1,332 @@
+<style>
+  .container {
+    width: 100vw;
+    max-width: 1280px;
+    min-height: 600px;
+    min-width: 1000px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 0 auto 50px;
+    gap: 20px;
+  }
+
+  .author-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border-bottom: solid 1px;
+    padding-bottom: 30px;
+  }
+
+  .border {
+    height: 190px;
+    width: 150px;
+    background: transparent;
+    border-radius: 10px;
+    transition: border 1s;
+    position: relative;
+  }
+
+  .border:hover {
+    border: 1px solid #fff;
+  }
+
+  .card {
+    height: 190px;
+    width: 150px;
+    background: #808080;
+    border-radius: 10px;
+    transition: background 0.8s;
+    overflow: hidden;
+    background: #000;
+    box-shadow: 0 70px 63px -60px #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    background-size: 300px;
+    background-position: center center;
+    background-repeat: no-repeat;
+  }
+
+  .card:hover {
+    background-size: 400px;
+    background-position: left center;
+    background-repeat: no-repeat;
+  }
+
+  .card:hover h3 {
+    opacity: 1;
+  }
+
+  .cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    overflow: hidden;
+  }
+
+  h2 {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: black;
+    margin: 0 0 20px;
+  }
+
+  h3 {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #fff;
+    margin: 20px;
+    opacity: 0;
+    transition: opacity 1s;
+  }
+
+  .btn {
+    width: 100px;
+    height: 25px;
+    position: absolute;
+    font-family: sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    border-radius: 10px;
+    background-color: white;
+    left: 50%;
+    bottom: 10px;
+    transform: translateX(-50%);
+  }
+
+  .searchArea {
+    display: flex;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 20px;
+    gap: 5px;
+  }
+
+  input#searchBox {
+    width: 100%;
+    font-size: 24px;
+  }
+
+  div#btnContainer {
+    display: flex;
+    width: 1280px;
+    margin: 0 auto;
+    justify-content: space-between;
+  }
+
+  div#btnContainer.load-more-container {
+    justify-content: center;
+  }
+
+  #authorHeader {
+    cursor: pointer;
+  }
+
+  .cards-container {
+    max-height: 0;
+    overflow: hidden;
+    transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .default-open {
+    max-height: 800px;
+  }
+</style>
+
+<div class="searchArea">
+  <input
+    id="searchBox"
+    type="text"
+    name="SearchBox"
+    placeholder="Enter author name..."
+  />
+  <input id="searchBtn" type="button" value="SEARCH" />
+  <input id="groupBtn" type="button" value="GROUP" />
+</div>
+<div class="container" id="container"></div>
+
+<template id="cardTemplateMain">
+  <div class="card" id="card">
+    <div class="border">
+      <h3 class="author" id="author"></h3>
+      <button class="btn" id="btn">More Info</button>
+    </div>
+  </div>
+</template>
+
+<template id="cardTemplateGrouped">
+  <div class="author-container" id="authorContainer">
+    <h2 class="author-header" id="authorHeader">Author</h2>
+    <div class="cards-container" id="cardsContainer"></div>
+  </div>
+</template>
+
+<template id="singleCardTemplate">
+  <div class="card" id="card">
+    <div class="border">
+      <h3 class="author" id="author"></h3>
+    </div>
+  </div>
+</template>
+
+<script>
+  const container = document.querySelector("#container");
+  const cardTemplate = document.querySelector("#cardTemplate");
+  const singleCardTemplate = document.querySelector("#singleCardTemplate");
+  const searchBtn = document.querySelector("#searchBtn");
+  const groupBtn = document.querySelector("#groupBtn");
+
+  const API_URL = "https://picsum.photos/v2/list?page=1&limit=60";
+
+  var jsonResponse = [];
+
+  async function apiCallback(url) {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error status: ${response.status}`);
+    }
+
+    var newJsonResponse = await response.json();
+
+    jsonResponse = jsonResponse.concat(newJsonResponse);
+
+    displayOutput(jsonResponse);
+
+    searchBtn.onclick = function () {
+      displayOutputByAuthor(jsonResponse);
+    };
+
+    groupBtn.onclick = function () {
+      container.innerHTML = "";
+      displayGroupedData(jsonResponse);
+    };
+  }
+
+  apiCallback(API_URL);
+
+  function displayOutput(data) {
+    container.innerHTML = "";
+    for (var i = 0; i < data.length; i++) {
+      var imgInfo = data[i];
+      cloning(imgInfo);
+    }
+  }
+
+  function displayOutputByAuthor(data) {
+    container.innerHTML = "";
+
+    if (searchBox.value == "") {
+      displayOutput(data);
+    } else {
+      searchArr(data);
+    }
+  }
+
+  function displayGroupedData(data) {
+    var groupedItem = groupByAuthor(data);
+
+    for (let author in groupedItem) {
+      const clone = cardTemplateGrouped.content.cloneNode(true);
+
+      const authorHeader = clone.querySelector("#authorHeader");
+      const cardsContainer = clone.querySelector("#cardsContainer");
+
+      authorHeader.textContent = author;
+
+      var items = groupedItem[author];
+
+      for (var i = 0; i < items.length; i++) {
+        var imgInfo = items[i];
+        const cardClone = singleCardTemplate.content.cloneNode(true);
+
+        const card = cardClone.querySelector("#card");
+        const author = cardClone.querySelector("#author");
+
+        card.style.backgroundImage = `url(${imgInfo.download_url})`;
+        author.textContent = imgInfo.author;
+
+        cardsContainer.appendChild(cardClone);
+      }
+
+      authorHeader.addEventListener("click", () => {
+        const isOpen = cardsContainer.classList.contains("default-open");
+        const inActiveCards = document.querySelectorAll(".cards-container");
+
+        inActiveCards.forEach((card) => {
+          card.classList.remove("default-open");
+        });
+
+        if (!isOpen) {
+          cardsContainer.classList.add("default-open");
+        }
+      });
+
+      container.appendChild(clone);
+    }
+  }
+
+  function groupByAuthor(arr) {
+    var grouped = {};
+    for (var i = 0; i < arr.length; i++) {
+      var item = arr[i];
+      if (!grouped[item.author]) {
+        grouped[item.author] = [];
+      }
+      grouped[item.author].push(item);
+    }
+
+    return grouped;
+  }
+
+  function cloning(imgInfo) {
+    const clone = cardTemplateMain.content.cloneNode(true);
+
+    const card = clone.querySelector("#card");
+    const author = clone.querySelector("#author");
+    const btn = clone.querySelector("#btn");
+
+    author.innerText = imgInfo.author;
+    card.style.backgroundImage = `url(${imgInfo.download_url})`;
+
+    //store card info into dataset of the card as JSON object
+    card.dataset.info = JSON.stringify(imgInfo);
+
+    btn.addEventListener("click", function () {
+      this.style.boxShadow = `inset 2px 2px 2px 1px rgb(129 119 119 / 50%),
+      inset -2px -2px 2px 1px rgb(233 217 217 / 50%)`;
+
+      // get clicked card dataset as JSON. Then, convert it to javascript object
+      var storedObject = JSON.parse(card.dataset.info);
+
+      alert(`
+        "id": ${storedObject.id},
+        "author": ${storedObject.author},
+        "width": ${storedObject.width},
+        "height": ${storedObject.height},
+        "url": ${storedObject.url},
+        "download_url": ${storedObject.download_url}
+        `);
+    });
+
+    container.appendChild(clone);
+  }
+
+  function searchArr(arr) {
+    for (var i = 0; i < arr.length; i++) {
+      if (arr[i].author.toLowerCase().includes(searchBox.value.toLowerCase())) {
+        cloning(arr[i]);
+      }
+    }
+    return "";
+  }
+
+  function swap(arr, left, right) {
+    var temp = arr[left];
+    arr[left] = arr[right];
+    arr[right] = temp;
+  }
+</script>
